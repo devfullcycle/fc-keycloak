@@ -29,9 +29,10 @@ const middlewareIsAuth = (
 };
 
 app.get("/login", (req, res) => {
+  // valor aleatório - sessão de usuário
   const loginParams = new URLSearchParams({
     client_id: "fullcycle-client",
-    redirect_uri: "http://localhost:3000/callback",
+    redirect_uri: "http://localhost:3000/test",
     response_type: "code",
     scope: "openid",
   });
@@ -57,7 +58,8 @@ app.get("/logout", (req, res) => {
   const url = `http://localhost:8080/realms/fullcycle-realm/protocol/openid-connect/logout?${logoutParams.toString()}`;
   res.redirect(url);
 });
-
+// /login ----> keycloak (formulario de auth) ----> /callback?code=123 ---> keycloak (devolve o token)
+//
 app.get("/callback", async (req, res) => {
 
   //@ts-expect-error - type mismatch
@@ -71,7 +73,7 @@ app.get("/callback", async (req, res) => {
     client_id: "fullcycle-client",
     grant_type: "authorization_code",
     code: req.query.code as string,
-    redirect_uri: "http://localhost:3000/callback",
+    redirect_uri: "http://localhost:3000/test",
   });
 
   const url = `http://host.docker.internal:8080/realms/fullcycle-realm/protocol/openid-connect/token`;
@@ -96,7 +98,7 @@ app.get("/callback", async (req, res) => {
   //@ts-expect-error - type mismatch
   req.session.id_token = result.id_token;
   req.session.save();
-  res.redirect("/admin");
+  res.json(result);
 });
 
 app.get("/admin", middlewareIsAuth, (req, res) => {
