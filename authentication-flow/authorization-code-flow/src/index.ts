@@ -1,6 +1,7 @@
 import express from "express";
 import session from "express-session";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 const app = express();
 
@@ -29,12 +30,19 @@ const middlewareIsAuth = (
 };
 
 app.get("/login", (req, res) => {
+  const nonce = crypto.randomBytes(16).toString("base64");
+
+  //@ts-expect-error - type mismatch
+  req.session.nonce = nonce;
+  req.session.save();
+
   // valor aleatório - sessão de usuário
   const loginParams = new URLSearchParams({
     client_id: "fullcycle-client",
     redirect_uri: "http://localhost:3000/test",
     response_type: "code",
     scope: "openid",
+    nonce,
   });
 
   const url = `http://localhost:8080/realms/fullcycle-realm/protocol/openid-connect/auth?${loginParams.toString()}`;
@@ -43,7 +51,6 @@ app.get("/login", (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-
   const logoutParams = new URLSearchParams({
     //client_id: "fullcycle-client",
     //@ts-expect-error
@@ -61,7 +68,6 @@ app.get("/logout", (req, res) => {
 // /login ----> keycloak (formulario de auth) ----> /callback?code=123 ---> keycloak (devolve o token)
 //
 app.get("/callback", async (req, res) => {
-
   //@ts-expect-error - type mismatch
   if (req.session.user) {
     return res.redirect("/admin");
@@ -89,10 +95,24 @@ app.get("/callback", async (req, res) => {
   const result = await response.json();
 
   console.log(result);
-  const payload = jwt.decode(result.access_token);
-  console.log(payload);
+  const payloadAccessToken = jwt.decode(result.access_token) as any;
+  const payloadRefreshToken = jwt.decode(result.refresh_token) as any;
+  const payloadIdToken = jwt.decode(result.id_token) as any;
+
+  if (
+    //@ts-expect-error - type mismatch
+    payloadAccessToken!.nonce !== req.session.nonce ||
+    //@ts-expect-error - type mismatch
+    payloadRefreshToken.nonce !== req.session.nonce ||
+    //@ts-expect-error - type mismatch
+    payloadIdToken.nonce !== req.session.nonce
+  ) {
+    return res.status(401).json({ message: "Unauthenticated" });
+  }
+
+  console.log(payloadAccessToken);
   //@ts-expect-error - type mismatch
-  req.session.user = payload;
+  req.session.user = payloadAccessToken;
   //@ts-expect-error - type mismatch
   req.session.access_token = result.access_token;
   //@ts-expect-error - type mismatch

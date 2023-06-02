@@ -22,7 +22,7 @@ O ataque Nonce Replay ocorre quando um invasor intercepta um token de ID e o reu
 
 O nonce é um parâmetro usado para evitar ataques de repetição (replay attacks) em protocolos de autenticação baseados em tokens, como o OAuth 2.0 e o OpenID Connect. O termo "nonce" significa "number used once" (número usado apenas uma vez), indicando que o valor do parâmetro deve ser único para cada solicitação de autenticação.
 
-### State Parameter CSRF Attack
+### State Parameter CSRF Attack (Cross-Site Request Forgery)
 
 O ataque CSRF ocorre quando um invasor engana um usuário para que ele execute uma ação em um aplicativo web sem o conhecimento do usuário. Para evitar esse ataque, o aplicativo deve usar um parâmetro de estado (state parameter) para verificar se a resposta recebida do servidor de autorização corresponde à solicitação original.
 
