@@ -31,18 +31,22 @@ const middlewareIsAuth = (
 
 app.get("/login", (req, res) => {
   const nonce = crypto.randomBytes(16).toString("base64");
+  const state = crypto.randomBytes(16).toString("base64");
 
   //@ts-expect-error - type mismatch
   req.session.nonce = nonce;
+  //@ts-expect-error - type mismatch
+  req.session.state = state;
   req.session.save();
 
   // valor aleatório - sessão de usuário
   const loginParams = new URLSearchParams({
     client_id: "fullcycle-client",
-    redirect_uri: "http://localhost:3000/test",
+    redirect_uri: "http://localhost:3000/callback",
     response_type: "code",
     scope: "openid",
     nonce,
+    state
   });
 
   const url = `http://localhost:8080/realms/fullcycle-realm/protocol/openid-connect/auth?${loginParams.toString()}`;
@@ -73,13 +77,19 @@ app.get("/callback", async (req, res) => {
     return res.redirect("/admin");
   }
 
+  //@ts-expect-error - type mismatch
+  if(req.query.state !== req.session.state) {
+    //poderia redirecionar para o login em vez de mostrar o erro
+    return res.status(401).json({ message: "Unauthenticated" });
+  }
+
   console.log(req.query);
 
   const bodyParams = new URLSearchParams({
     client_id: "fullcycle-client",
     grant_type: "authorization_code",
     code: req.query.code as string,
-    redirect_uri: "http://localhost:3000/test",
+    redirect_uri: "http://localhost:3000/callback",
   });
 
   const url = `http://host.docker.internal:8080/realms/fullcycle-realm/protocol/openid-connect/token`;
