@@ -1,0 +1,15 @@
+@startuml
+actor User
+participant Client
+participant AuthorizationServer
+participant ResourceServer
+
+User -> Client: Acessa o aplicativo
+Client -> AuthorizationServer: Solicita autorização
+AuthorizationServer -> User: Exibe tela de login
+User -> AuthorizationServer: Insere credenciais
+AuthorizationServer -> User: Autentica o usuário
+User -> AuthorizationServer: Autoriza o acesso
+AuthorizationServer -> Client: Redireciona para o URI de redirecionamento com o token de acesso/id token
+Client -> User: Exibe recurso protegido
+@enduml
