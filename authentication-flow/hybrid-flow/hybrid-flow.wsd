@@ -1,0 +1,24 @@
+@startuml
+
+actor User
+participant UserAgent
+participant Client
+participant AuthorizationServer
+participant ResourceServer
+
+User -> UserAgent: Acessa o aplicativo
+UserAgent -> Client: Solicita autorização
+Client -> AuthorizationServer: Solicita autorização
+AuthorizationServer -> UserAgent: Exibe tela de login
+UserAgent -> AuthorizationServer: Insere credenciais
+AuthorizationServer -> UserAgent: Autentica o usuário
+UserAgent -> AuthorizationServer: Autoriza o acesso
+AuthorizationServer -> UserAgent: Retorna o código de autorização e o ID token/Access Token
+UserAgent -> Client: Redireciona para o URI de redirecionamento com o código de autorização e o ID token/Access Token
+Client -> User: Redireciona para a URL de callback com o código de autorização e o ID token/Access Token
+User -> Client: Acessa a URL de callback
+Client -> AuthorizationServer: Troca o código de autorização por tokens de acesso e ID token
+AuthorizationServer -> Client: Retorna os tokens de acesso e ID token
+Client -> User: Exibe recurso protegido
+
+@enduml

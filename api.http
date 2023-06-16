@@ -17,3 +17,12 @@ username=user@user.com
 &grant_type=password
 &client_id=fullcycle-client
 &scope=openid
+
+### authorization code flow
+POST http://localhost:8080/realms/fullcycle-realm/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+&client_id=fullcycle-client
+&code=d803812a-1cce-4d38-9d12-a33f143f5ee0.48ce3bf7-ef07-4aab-bf41-5b7726c97e56.34b28fed-8773-41a4-bfde-bf98c8950b26
+&redirect_uri=http://localhost:3000/callback
